@@ -22,7 +22,7 @@ const Register = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:4000/api/user/register', formData);
-      console.log(response.data);
+      (response.data);
       // Handle successful registration (e.g., store token, redirect)
     } catch (error) {
       console.error(error);

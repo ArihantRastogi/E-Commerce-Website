@@ -14,7 +14,7 @@ const Login = () => {
   useEffect(() => {
     const checkToken = async () => {
       const token = Cookies.get('token');
-      console.log(token);
+      // console.log(token);
       if (!token) {
         setIsLoggedIn(false);
         return;
@@ -49,8 +49,9 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:4000/api/user/login', formData);
       if (response.data.success) {
-        console.log(response.data);
+        // console.log(response.data);
         Cookies.set('token', response.data.token, { expires: 7 }); // Set token with 7-day expiry
+        Cookies.set('userEmail', formData.email, { expires: 7 }); // Set user email with 7-day expiry
         setIsLoggedIn(true);
       } else {
         setError(response.data.message);

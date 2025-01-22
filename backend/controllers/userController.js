@@ -9,27 +9,6 @@ const createToken = (id) => {
 }
 
 // route for user login
-// const login = async (req, res) => {
-//     try {
-//         const { email, password } = req.body;
-//         // check if user exists
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.json({ success: false, message: "User does not exist" });
-//         }
-//         // check if password matches
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (!isMatch) {
-//             return res.json({ success: false, message: "Invalid credentials" });
-//         }
-//         // create token
-//         const token = createToken(user._id);
-//         res.json({ success: true, token });
-//     } catch (error) {
-//         res.json({ success: false, message: error.message });
-//     }
-// }
-
 const login = async (req, res) => {
     try{
         const { email, password } = req.body;
@@ -82,7 +61,7 @@ const register = async (req, res) => {
         console.log(newUser);
 
         const token = createToken(user._id);
-        console.log(token);
+        // console.log(token);
 
         res.json({ success: true, token });
 
@@ -92,9 +71,9 @@ const register = async (req, res) => {
 }
 
 const checkToken = (req, res) => {
-    console.log(req)
+    // console.log(req)
     const token = req.body.token;
-    console.log(token);
+    // console.log(token);
     if (!token) {
         return res.status(401).json({ success: false, message: 'No token provided' });
     }
@@ -107,4 +86,36 @@ const checkToken = (req, res) => {
     }
 };
 
-export { login, register, checkToken};
+const details = async (req, res) => {
+    console.log(req.body.email);
+    const email = req.body.email;
+    try {
+        const user = await User.findOne({ email });
+        console.log(user);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+const update = async (req, res) => {
+    const { email, firstName, lastName, contactNumber } = req.body;
+    try {
+        const user = await User.findOneAndUpdate(
+            { email },
+            { firstName, lastName, contactNumber },
+            { new: true }
+        );
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export { login, register, checkToken, details, update };
