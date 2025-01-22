@@ -63,10 +63,10 @@ const register = async (req, res) => {
         const token = createToken(user._id);
         // console.log(token);
 
-        res.json({ success: true, token });
+        return res.json({ success: true, token });
 
     } catch (error) {
-        res.json({ success: false, message: error.message });
+        return res.json({ success: false, message: error.message });
     }
 }
 

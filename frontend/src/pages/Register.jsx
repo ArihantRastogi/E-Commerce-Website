@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ const Register = () => {
     contactNumber: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,11 +25,14 @@ const Register = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:4000/api/user/register', formData);
-      (response.data);
-      // Handle successful registration (e.g., store token, redirect)
+      if (response.data.success) {
+        navigate('/login'); // Redirect to login page
+      } else {
+        setError(response.data.message);
+      }
     } catch (error) {
       console.error(error);
-      // Handle registration error
+      setError('An error occurred. Please try again.');
     }
   };
 
@@ -34,6 +40,7 @@ const Register = () => {
     <div className="flex justify-center items-center h-screen">
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-80">
         <h2 className="text-2xl mb-4">Register</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
         <div className="mb-4">
           <label className="block text-gray-700">First Name</label>
           <input
