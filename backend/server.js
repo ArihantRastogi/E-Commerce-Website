@@ -5,6 +5,7 @@ import connectDB from './config/mongodb.js'
 import userRouter from './routes/userRoute.js'
 import productRouter from './routes/productRoute.js'
 import cookieParser from 'cookie-parser';
+import sellerRouter from './routes/sellerRoute.js'
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -17,6 +18,7 @@ app.use(cookieParser());
 
 app.use('/api/user', userRouter)
 app.use('/api/product', productRouter)
+app.use('/api/sell', sellerRouter)
 
 app.get('/', (req, res) => {
     res.send("API is running")

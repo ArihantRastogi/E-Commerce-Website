@@ -58,7 +58,7 @@ const register = async (req, res) => {
         const newUser = new User({ firstName, lastName, email, contactNumber, password: hashedPassword });
 
         const user = await newUser.save();
-        console.log(newUser);
+        // console.log(newUser);
 
         const token = createToken(user._id);
         // console.log(token);
@@ -87,11 +87,11 @@ const checkToken = (req, res) => {
 };
 
 const details = async (req, res) => {
-    console.log(req.body.email);
+    // console.log(req.body.email);
     const email = req.body.email;
     try {
         const user = await User.findOne({ email });
-        console.log(user);
+        // console.log(user);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }

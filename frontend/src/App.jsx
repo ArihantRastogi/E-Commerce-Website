@@ -9,6 +9,8 @@ import Profile from './pages/Profile'
 import Navbar from './components/Navbar'
 import Product from './pages/Product'
 import Item from './pages/Item'
+import Sell from './pages/Sell'
+import SellItem from './pages/SellItem'
 
 const App = () => {
   return (
@@ -21,8 +23,10 @@ const App = () => {
         <Route path='/contact' element={<Contact />} />
         <Route path='/login' element={<Login />} />
         <Route path='/profile' element={<Profile />} />
-        <Route path='/products' element={<Product />} />
+        <Route path='/product' element={<Product />} />
         <Route path='/product/:id' element={<Item />} />
+        <Route path='/sell' element={<Sell />} />
+        <Route path='/sellitem' element={<SellItem />} />
       </Routes>
     </div>
   )

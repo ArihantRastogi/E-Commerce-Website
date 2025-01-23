@@ -59,6 +59,7 @@ const Item = () => {
             <h1>{item.name}</h1>
             <p>{item.description}</p>
             <p>Price: ${item.price}</p>
+            <p>Category: {item.category}</p>
             <p>Seller: {item.userEmail}</p>
         </div>
     );

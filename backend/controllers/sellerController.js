@@ -2,11 +2,11 @@ import Item from "../models/itemModel.js";
 import User from "../models/userModels.js";
 import asyncHandler from 'express-async-handler';
 
-// Fetch products that the user is not an owner of
+// Fetch products that the user is an owner of
 const getProducts = asyncHandler(async (req, res) => {
     const userId = req.query.userId; // Get userId from query parameters
     try {
-        const products = await Item.find();
+        const products = await Item.find({ sellerId: userId });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -39,13 +39,14 @@ const getProductById = asyncHandler(async (req, res) => {
 
 // Add new product
 const addProduct = asyncHandler(async (req, res) => {
-    const { name, price, description, category, sellerId } = req.body;
-    const _id = req.body.sellerId;
+    const { name, price, description, category, sellerId: userEmail } = req.body;
+    console.log(req.body);
     // check if user exists
-    const user = await User.findOne({ _id });
+    const user = await User.findOne({ email: userEmail });
     if (!user) {
         return res.json({ success: false, message: "User does not exist" });
     }
+    const sellerId = user._id;
     const product = new Item({
         name,
         price,
@@ -55,7 +56,20 @@ const addProduct = asyncHandler(async (req, res) => {
     });
 
     const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+    res.json({ success: true, createdProduct });
 });
 
-export { getProductById, addProduct, getProducts };
+//delete product
+const deleteProduct = asyncHandler(async (req, res) => {
+    console.log(req.body);
+    const product = await Item.findById(req.body.itemId);
+    if (product) {
+        await product.deleteOne();
+        res.json({ message: 'Product removed' });
+    } else {
+        res.status(404);
+        throw new Error('Product not found');
+    }
+});
+
+export { getProductById, addProduct, getProducts, deleteProduct };

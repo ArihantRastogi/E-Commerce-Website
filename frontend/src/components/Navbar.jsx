@@ -32,7 +32,10 @@ const Navbar = () => {
       </ul>
 
       <div className='flex items-center space-x-6'>
-        <NavLink to='/products'>
+        <NavLink to='/sell'>
+        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.plus} className='h-5' alt="sell" />
+        </NavLink>
+        <NavLink to='/product'>
         <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.search} className='h-8' alt="search" />
         </NavLink>
         <div className='group relative'>
