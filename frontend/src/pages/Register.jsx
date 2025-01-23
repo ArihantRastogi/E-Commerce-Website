@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +12,31 @@ const Register = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = Cookies.get('token');
+      if (!token) {
+        setIsLoggedIn(false);
+        return;
+      }
+      try {
+        const response = await axios.post('http://localhost:4000/api/user/checkToken', { token });
+        if (response.data.success) {
+          setIsLoggedIn(true);
+        } else {
+          Cookies.remove('token');
+        }
+      } catch (error) {
+        console.error('Error checking token:', error);
+        Cookies.remove('token');
+      }
+    };
+
+    checkToken();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,6 +60,10 @@ const Register = () => {
       setError('An error occurred. Please try again.');
     }
   };
+
+  if (isLoggedIn) {
+    return <Navigate to="/profile" />;
+  }
 
   return (
     <div className="flex justify-center items-center h-screen">

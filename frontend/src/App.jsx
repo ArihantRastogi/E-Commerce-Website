@@ -6,7 +6,9 @@ import Contact from './pages/Contact'
 import Register from './pages/Register'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
-import Navbar from './components/Navbar' // Ensure correct import
+import Navbar from './components/Navbar'
+import Product from './pages/Product'
+import Item from './pages/Item'
 
 const App = () => {
   return (
@@ -19,6 +21,8 @@ const App = () => {
         <Route path='/contact' element={<Contact />} />
         <Route path='/login' element={<Login />} />
         <Route path='/profile' element={<Profile />} />
+        <Route path='/products' element={<Product />} />
+        <Route path='/product/:id' element={<Item />} />
       </Routes>
     </div>
   )

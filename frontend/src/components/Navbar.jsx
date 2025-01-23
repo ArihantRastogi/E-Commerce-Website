@@ -32,6 +32,9 @@ const Navbar = () => {
       </ul>
 
       <div className='flex items-center space-x-6'>
+        <NavLink to='/products'>
+        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.search} className='h-8' alt="search" />
+        </NavLink>
         <div className='group relative'>
           <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.profile} className='h-8' alt="profile" />
           <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>

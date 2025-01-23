@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Navigate, Link } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-const Product = () => {
-    const [items, setItems] = useState([]);
+const Item = () => {
+    const { id } = useParams();
+    const [item, setItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const fetchItems = async (userId) => {
+        const fetchItem = async () => {
             try {
-                const { data } = await axios.get(`http://localhost:4000/api/product?userId=${userId}`);
-                setItems(data);
+                const { data } = await axios.get(`http://localhost:4000/api/product/${id}`);
+                setItem(data);
                 setLoading(false);
             } catch (error) {
-                setError('Error fetching items');
+                setError('Error fetching item');
                 setLoading(false);
             }
         };
@@ -32,7 +33,7 @@ const Product = () => {
                 const response = await axios.post('http://localhost:4000/api/user/checkToken', { token });
                 if (response.data.success) {
                     setIsLoggedIn(true);
-                    fetchItems(response.data.userId);
+                    fetchItem();
                 } else {
                     Cookies.remove('token');
                     Cookies.remove('userEmail');
@@ -47,7 +48,7 @@ const Product = () => {
         };
 
         checkToken();
-    }, []);
+    }, [id]);
 
     if (loading) return <div>Loading...</div>;
     if (!isLoggedIn) return <Navigate to="/login" />;
@@ -55,18 +56,12 @@ const Product = () => {
 
     return (
         <div>
-            <h1>Items</h1>
-            <ul>
-                {items.map(item => (
-                    <li key={item._id}>
-                        <h2><Link to={`/product/${item._id}`}>{item.name}</Link></h2>
-                        <p>{item.description}</p>
-                        <p>Price: ${item.price}</p>
-                    </li>
-                ))}
-            </ul>
+            <h1>{item.name}</h1>
+            <p>{item.description}</p>
+            <p>Price: ${item.price}</p>
+            <p>Seller: {item.userEmail}</p>
         </div>
     );
 };
 
-export default Product;
+export default Item;
