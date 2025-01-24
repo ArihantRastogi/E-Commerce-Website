@@ -205,4 +205,24 @@ const regenerateOtp = asyncHandler(async (req, res) => {
     }
 });
 
-export { addOrder, getSoldProducts, getBoughtProducts, getOrders, getSellOrders, deleteProduct, checkProduct, verifyOtp, regenerateOtp };
+const getOrderedItems = asyncHandler(async (req, res) => {
+    // console.log(req.body)
+    const orderID = req.body.order;
+    try {
+        const order = await Order.findById(orderID);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        const orderedItems = order.Items;
+        // console.log(orderedItems)
+        const products = await Promise.all(orderedItems.map(async (item) => {
+            const product = await Item.findById(item);
+            return product;
+        }));
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+export { addOrder, getSoldProducts, getBoughtProducts, getOrders, getSellOrders, deleteProduct, checkProduct, verifyOtp, regenerateOtp, getOrderedItems };

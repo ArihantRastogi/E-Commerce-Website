@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 
 const Deliver = () => {
     const [orders, setOrders] = useState([]);
+    const [itemsByOrder, setItemsByOrder] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -15,6 +16,22 @@ const Deliver = () => {
             try {
                 const { data } = await axios.get(`http://localhost:4000/api/order/deliver?userId=${userId}`);
                 setOrders(data);
+                
+                // Fetch items for each order and store in an object keyed by order ID
+                const itemsPromises = data.map(async (order) => {
+                    try {
+                        const itemsResponse = await axios.post('http://localhost:4000/api/order/getOrderedItems', { order: order._id });
+                        return { [order._id]: itemsResponse.data };
+                    } catch (error) {
+                        console.error(`Error fetching items for order ${order._id}:`, error);
+                        return { [order._id]: [] };
+                    }
+                });
+
+                const itemsResults = await Promise.all(itemsPromises);
+                const itemsMap = itemsResults.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+                
+                setItemsByOrder(itemsMap);
                 setLoading(false);
             } catch (error) {
                 setError('Error fetching items');
@@ -49,7 +66,7 @@ const Deliver = () => {
         };
 
         checkToken();
-    }, [sellerEmail]);
+    }, []);
 
     const handleOTPSubmit = async (orderId, otp) => {
         try {
@@ -83,11 +100,11 @@ const Deliver = () => {
       <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">Deliver Orders</h1>
       
-      {/* Table-like layout */}
       <div className="w-full overflow-x-auto">
-        <div className="grid grid-cols-6 gap-2 bg-gray-100 p-2 font-bold text-center">
+        <div className="grid grid-cols-7 gap-2 bg-gray-100 p-2 font-bold text-center">
         <div>Order ID</div>
         <div>Status</div>
+        <div>Items</div>
         <div>Amount</div>
         <div>Buyer</div>
         <div>Order Date</div>
@@ -98,11 +115,17 @@ const Deliver = () => {
         {orders.map(order => (
           <div 
           key={order._id} 
-          className="grid grid-cols-6 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
+          className="grid grid-cols-7 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
           >
           <div>{order._id}</div>
           <div className={order.transactionStatus === 'Pending' ? 'text-orange-500' : ''}>
             {order.transactionStatus}
+          </div>
+          <div>
+            {itemsByOrder[order._id] ? 
+              itemsByOrder[order._id].map(item => item.name).join(', ') : 
+              'Loading...'
+            }
           </div>
           <div>₹{order.amount.toFixed(2)}</div>
           <div>{order.buyerEmail}</div>
