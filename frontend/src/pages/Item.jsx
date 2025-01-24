@@ -163,10 +163,13 @@ const Item = () => {
                             <p className="text-lg">
                                 <strong>Seller:</strong> {item.userEmail}
                             </p>
+                            <p className="text-lg">
+                                <strong>Status:</strong> {item.status}
+                            </p>
                         </div>
                         <button
                             onClick={() => handleAddToCart(item._id)}
-                            disabled={userEmail === item.userEmail || isInCart}
+                            disabled={userEmail === item.userEmail || isInCart || item.status === "sold"}
                             className={`
                                 w-full py-3 rounded-lg text-white font-bold transition-all duration-300
                                 ${userEmail === item.userEmail 

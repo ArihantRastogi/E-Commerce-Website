@@ -25,6 +25,7 @@ const getProductById = asyncHandler(async (req, res) => {
                 price: product.price,
                 category: product.category,
                 sellerId: product.sellerId,
+                status: product.status,
                 userEmail: seller.email
             });
         } else {

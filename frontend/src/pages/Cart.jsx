@@ -16,7 +16,9 @@ const Cart = () => {
         const fetchItems = async (userId) => {
             try {
                 const { data } = await axios.get(`http://localhost:4000/api/cart?userId=${userId}`);
-                setItems(data);
+                const availableItems = data.filter(item => item.status === 'available');
+                setItems(availableItems);
+                // setItems(data);
                 setLoading(false);
             } catch (error) {
                 setError('Error fetching items');
@@ -79,6 +81,61 @@ const Cart = () => {
         }
     };
 
+    const generateOtp = () => {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    };
+
+    const handlePlaceOrder = async () => {
+        const buyerEmail = Cookies.get('userEmail');
+        const groupedItems = items.reduce((acc, item) => {
+            if (!acc[item.sellerId]) {
+                acc[item.sellerId] = [];
+            }
+            acc[item.sellerId].push(item);
+            return acc;
+        }, {});
+
+        try {
+            for (const sellerId in groupedItems) {
+                const items = groupedItems[sellerId];
+                const amount = items.reduce((total, item) => total + item.price, 0);
+                const otp = generateOtp();
+                const Items = items.map(item => item._id);
+                console.log({ buyerEmail, sellerId, amount, otp, Items });
+
+                const response = await axios.post('http://localhost:4000/api/order/add', {
+                    buyerEmail,
+                    sellerId,
+                    amount,
+                    otp,
+                    Items
+                });
+
+                if (!response.data.success) {
+                    alert(`Failed to place order for seller: ${sellerId}`);
+                    return;
+                }
+                for (const item of items) {
+                    console.log(item);
+                    const response = await axios.post('http://localhost:4000/api/cart/update', {
+                        buyerEmail: buyerEmail,
+                        productId: item._id,
+                        status: 'sold'
+                    });
+                    if (!response.data.success) {
+                        alert(`Failed to update cart for item: ${item._id}`);
+                        return;
+                    }
+                }
+            }
+            window.location.reload();
+            // Optionally, you can clear the cart or navigate to another page
+        } catch (error) {
+            console.error('Error placing order:', error);
+            alert('Failed to place order');
+        }
+    };
+
     const filteredItems = items.filter(item => {
         const matchesSearchTerm = item.name.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(item.category);
@@ -103,9 +160,15 @@ const Cart = () => {
 
     return (
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-center">Cart</h1>
-        
-        {/* Order Summary Section */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold mb-6 text-center">Cart</h1>
+          <button 
+            onClick={handlePlaceOrder} 
+            className="bg-green-500 text-white p-2 rounded"
+          >
+            Place Order
+          </button>
+        </div>
         <div className="bg-gray-50 border rounded-lg p-4 mb-6 flex justify-between items-center">
           <div className="flex-grow">
             <h2 className="text-2xl font-bold mb-2">Order Summary</h2>
@@ -124,8 +187,6 @@ const Cart = () => {
             Total: ₹{totalPrice.toFixed(2)}
           </div>
         </div>
-
-        {/* Search and Filter Section */}
         <div className="flex mb-4">
           <input
             type="text"
@@ -161,8 +222,6 @@ const Cart = () => {
             )}
           </div>
         </div>
-
-        {/* Items Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredItems.map(item => (
             <div 

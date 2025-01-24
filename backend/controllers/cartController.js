@@ -70,7 +70,7 @@ const checkProduct = asyncHandler(async (req, res) => {
 });
 
 
-// delete product
+// Delete product
 const deleteProduct = asyncHandler(async (req, res) => {
     const { userEmail, productId } = req.body;
     try {
@@ -94,4 +94,30 @@ const deleteProduct = asyncHandler(async (req, res) => {
     }
 });
 
-export { addProduct, getProducts, deleteProduct, checkProduct };
+// Update status of product and user
+const updateStatus = asyncHandler(async (req, res) => {
+    const { productId, status, buyerEmail } = req.body;
+    console.log(req.body);
+    try {
+        const product = await Item.findOne({ _id: productId });
+        if(!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+        product.status = status;
+        await product.save();
+        console.log(product);
+        const buyer = await User.findOneAndUpdate(
+            { email: buyerEmail },
+            { $pull: { cartItems: productId } },
+            { new: true }
+        );
+        if(!buyer) {
+            return res.status(404).json({ success: false, message: "Buyer not found" });
+        }
+        res.json({ success: true, product });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+export { addProduct, getProducts, deleteProduct, checkProduct, updateStatus };

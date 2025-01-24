@@ -16,7 +16,8 @@ const Product = () => {
         const fetchItems = async (userId) => {
             try {
                 const { data } = await axios.get(`http://localhost:4000/api/product?userId=${userId}`);
-                setItems(data);
+                const availableItems = data.filter(item => item.status === 'available');
+                setItems(availableItems);
                 setLoading(false);
             } catch (error) {
                 setError('Error fetching items');

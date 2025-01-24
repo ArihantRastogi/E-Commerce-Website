@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
-    transactionId: {
+    transactionStatus: {
         type: String,
-        required: true
+        enum: ['Pending', 'Completed'],
+        default: 'Pending'
     },
     buyerId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -15,8 +16,26 @@ const orderSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    buyerEmail: {
+        type: String,
+        required: true
+    },
+    sellerEmail: {
+        type: String,
+        ref: 'User',
+        required: true
+    },
+    Items: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        default: []
+    }],
     amount: {
         type: Number,
+        required: true
+    },
+    otp: {
+        type: String,
         required: true
     },
     hashedOtp: {
@@ -24,6 +43,7 @@ const orderSchema = new mongoose.Schema({
         required: true
     }
 }, {
+    minimize: false,
     timestamps: true
 });
 

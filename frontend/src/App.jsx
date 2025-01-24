@@ -12,10 +12,13 @@ import Item from './pages/Item'
 import Sell from './pages/Sell'
 import SellItem from './pages/SellItem'
 import Cart from './pages/Cart'
+import SoldItems from './pages/SoldItems'
+import BoughtItems from './pages/BoughtItems'
+import Orders from './pages/Orders'
 
 const App = () => {
   return (
-    <div className='px-4 sm:px-[5vw] md:px-[10vw] lg:px-[15vw] xl:px-[20vw]'>
+    <div className='px-2 sm:px-[2vw] md:px-[3vw] lg:px-[5vw] xl:px-[6vw]'>
       <Navbar />
       <Routes>
         <Route path='/' element={<Home />} />
@@ -29,6 +32,9 @@ const App = () => {
         <Route path='/sell' element={<Sell />} />
         <Route path='/sellitem' element={<SellItem />} />
         <Route path='/cart' element={<Cart />} />
+        <Route path='/order' element={<Orders />} />
+        <Route path='/solditems' element={<SoldItems />} />
+        <Route path='/boughtitems' element={<BoughtItems />} />
       </Routes>
     </div>
   )

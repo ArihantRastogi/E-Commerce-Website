@@ -7,6 +7,7 @@ import productRouter from './routes/productRoute.js'
 import cookieParser from 'cookie-parser';
 import sellerRouter from './routes/sellerRoute.js'
 import cartRouter from './routes/cartRoute.js'
+import orderRouter from './routes/orderRoute.js'
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -21,6 +22,7 @@ app.use('/api/user', userRouter)
 app.use('/api/product', productRouter)
 app.use('/api/sell', sellerRouter)
 app.use('/api/cart', cartRouter)
+app.use('/api/order', orderRouter)
 
 app.get('/', (req, res) => {
     res.send("API is running")

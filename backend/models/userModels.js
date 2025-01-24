@@ -28,6 +28,16 @@ const userSchema = new mongoose.Schema({
         ref: 'Product',
         default: []
     }],
+    boughtItems: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Item',
+        default: []
+    }],
+    soldItems: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Item',
+        default: []
+    }],
     sellerReviews: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Review',
