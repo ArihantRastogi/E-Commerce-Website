@@ -53,7 +53,7 @@ const Sell = () => {
     const deleteItem = async (itemId) => {
         try {
             const response = await axios.post('http://localhost:4000/api/sell/delete', {itemId});
-            console.log(response.data);
+            // console.log(response.data);
             window.location.reload();
         } catch (error) {
             console.error('Error deleting item:', error);

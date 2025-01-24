@@ -31,12 +31,15 @@ const Navbar = () => {
         </NavLink>
       </ul>
 
-      <div className='flex items-center space-x-6'>
+      <div className='flex items-center space-x-5'>
         <NavLink to='/sell'>
-        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.plus} className='h-5' alt="sell" />
+        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.plus} className='h-6' alt="sell" />
         </NavLink>
         <NavLink to='/product'>
-        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.search} className='h-8' alt="search" />
+        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.search} className='h-10' alt="search" />
+        </NavLink>
+        <NavLink to='/cart'>
+        <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.cart} className='h-12' alt="cart" />
         </NavLink>
         <div className='group relative'>
           <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.profile} className='h-8' alt="profile" />

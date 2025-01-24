@@ -11,6 +11,7 @@ import Product from './pages/Product'
 import Item from './pages/Item'
 import Sell from './pages/Sell'
 import SellItem from './pages/SellItem'
+import Cart from './pages/Cart'
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
         <Route path='/product/:id' element={<Item />} />
         <Route path='/sell' element={<Sell />} />
         <Route path='/sellitem' element={<SellItem />} />
+        <Route path='/cart' element={<Cart />} />
       </Routes>
     </div>
   )

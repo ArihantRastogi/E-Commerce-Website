@@ -8,7 +8,7 @@ const SellItem = () => {
         name: '',
         price: '',
         description: '',
-        category: 'clothing'
+        category: 'Clothing'
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();

@@ -40,7 +40,7 @@ const getProductById = asyncHandler(async (req, res) => {
 // Add new product
 const addProduct = asyncHandler(async (req, res) => {
     const { name, price, description, category, sellerId: userEmail } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     // check if user exists
     const user = await User.findOne({ email: userEmail });
     if (!user) {
@@ -59,9 +59,9 @@ const addProduct = asyncHandler(async (req, res) => {
     res.json({ success: true, createdProduct });
 });
 
-//delete product
+// delete product
 const deleteProduct = asyncHandler(async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const product = await Item.findById(req.body.itemId);
     if (product) {
         await product.deleteOne();
