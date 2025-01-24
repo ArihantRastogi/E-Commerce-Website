@@ -172,7 +172,7 @@ const Item = () => {
                             disabled={userEmail === item.userEmail || isInCart || item.status === "sold"}
                             className={`
                                 w-full py-3 rounded-lg text-white font-bold transition-all duration-300
-                                ${userEmail === item.userEmail 
+                                ${userEmail === item.userEmail || item.status === "sold"
                                     ? 'bg-gray-400 cursor-not-allowed' 
                                     : isInCart 
                                     ? 'bg-green-500 hover:bg-green-600' 

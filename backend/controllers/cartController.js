@@ -97,7 +97,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 // Update status of product and user
 const updateStatus = asyncHandler(async (req, res) => {
     const { productId, status, buyerEmail } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     try {
         const product = await Item.findOne({ _id: productId });
         if(!product) {
@@ -105,7 +105,7 @@ const updateStatus = asyncHandler(async (req, res) => {
         }
         product.status = status;
         await product.save();
-        console.log(product);
+        // console.log(product);
         const buyer = await User.findOneAndUpdate(
             { email: buyerEmail },
             { $pull: { cartItems: productId } },

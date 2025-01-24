@@ -3,16 +3,17 @@ import axios from 'axios';
 import { Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-const Orders = () => {
+const Deliver = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [sellerEmail, setSellerEmail] = useState('');
 
     useEffect(() => {
         const fetchOrders = async (userId) => {
             try {
-                const { data } = await axios.get(`http://localhost:4000/api/order?userId=${userId}`);
+                const { data } = await axios.get(`http://localhost:4000/api/order/deliver?userId=${userId}`);
                 setOrders(data);
                 setLoading(false);
             } catch (error) {
@@ -32,6 +33,7 @@ const Orders = () => {
                 const response = await axios.post('http://localhost:4000/api/user/checkToken', { token });
                 if (response.data.success) {
                     setIsLoggedIn(true);
+                    setSellerEmail(response.data.userEmail);
                     fetchOrders(response.data.userId);
                 } else {
                     Cookies.remove('token');
@@ -47,19 +49,19 @@ const Orders = () => {
         };
 
         checkToken();
-    }, []);
+    }, [sellerEmail]);
 
-    const handleRegenerateOTP = async (orderId) => {
+    const handleOTPSubmit = async (orderId, otp) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/order/regenerateOtp', { orderId });
+            const response = await axios.post('http://localhost:4000/api/order/verifyOtp', { orderId, otp });
             if (response.data.success) {
                 window.location.reload();
             } else {
-                alert('Error regenerating OTP');
+                alert('Invalid OTP');
             }
         } catch (error) {
-            console.error('Error regenerating OTP:', error);
-            alert('Error regenerating OTP');
+            console.error('Error verifying OTP:', error);
+            alert('Error verifying OTP');
         }
     };
 
@@ -79,25 +81,24 @@ const Orders = () => {
 
     return (
       <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">My Orders</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Deliver Orders</h1>
       
       {/* Table-like layout */}
       <div className="w-full overflow-x-auto">
-        <div className="grid grid-cols-7 gap-2 bg-gray-100 p-2 font-bold text-center">
+        <div className="grid grid-cols-6 gap-2 bg-gray-100 p-2 font-bold text-center">
         <div>Order ID</div>
         <div>Status</div>
         <div>Amount</div>
         <div>Buyer</div>
-        <div>Seller</div>
         <div>Order Date</div>
-        <div>OTP</div>
+        <div>Enter OTP</div>
         </div>
         
         <div className="divide-y divide-gray-200">
         {orders.map(order => (
           <div 
           key={order._id} 
-          className="grid grid-cols-7 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
+          className="grid grid-cols-6 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
           >
           <div>{order._id}</div>
           <div className={order.transactionStatus === 'Pending' ? 'text-orange-500' : ''}>
@@ -105,15 +106,16 @@ const Orders = () => {
           </div>
           <div>₹{order.amount.toFixed(2)}</div>
           <div>{order.buyerEmail}</div>
-          <div>{order.sellerEmail}</div>
           <div>{new Date(order.createdAt).toLocaleDateString()}</div>
-          <div>{order.otp}
-          <button 
-              onClick={() => handleRegenerateOTP(order._id)} 
-              className="p-1 text-gray-500 rounded"
-            >
-              ↺
-            </button>
+          <div>
+            <form onSubmit={(e) => {
+                e.preventDefault();
+                const otp = e.target.elements.otp.value;
+                handleOTPSubmit(order._id, otp);
+            }} className="flex items-center">
+                <input type="text" name="otp" placeholder="Enter OTP" className="border p-1 rounded w-24" />
+                <button type="submit" className="ml-2 p-1 w-24 bg-blue-500 text-white rounded">Submit</button>
+            </form>
           </div>
           </div>
         ))}
@@ -123,4 +125,4 @@ const Orders = () => {
     );
 };
 
-export default Orders;
+export default Deliver;

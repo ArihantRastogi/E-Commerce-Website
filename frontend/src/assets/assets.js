@@ -4,6 +4,8 @@ import search from './search.png'
 import plus from './plus.png'
 import cart from './cart.png'
 import order from './order.png'
+import deliver from './deliver.png'
+import iiith from './iiith.png'
 
 export const assets = {
   logo,
@@ -11,5 +13,7 @@ export const assets = {
   search,
   plus,
   cart,
-  order
+  order,
+  deliver,
+  iiith
 }

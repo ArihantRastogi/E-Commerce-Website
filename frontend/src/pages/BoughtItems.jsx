@@ -87,7 +87,7 @@ const BoughtItems = () => {
 
     return (
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-center">Our Products</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center">Bought Items</h1>
         <div className="flex mb-4">
           <input
             type="text"

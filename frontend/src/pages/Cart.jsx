@@ -101,7 +101,7 @@ const Cart = () => {
                 const amount = items.reduce((total, item) => total + item.price, 0);
                 const otp = generateOtp();
                 const Items = items.map(item => item._id);
-                console.log({ buyerEmail, sellerId, amount, otp, Items });
+                // console.log({ buyerEmail, sellerId, amount, otp, Items });
 
                 const response = await axios.post('http://localhost:4000/api/order/add', {
                     buyerEmail,
@@ -116,7 +116,7 @@ const Cart = () => {
                     return;
                 }
                 for (const item of items) {
-                    console.log(item);
+                    // console.log(item);
                     const response = await axios.post('http://localhost:4000/api/cart/update', {
                         buyerEmail: buyerEmail,
                         productId: item._id,

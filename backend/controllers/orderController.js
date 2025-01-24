@@ -58,6 +58,22 @@ const getOrders = asyncHandler(async (req, res) => {
     }
 });
 
+// Fetch seller orders
+const getSellOrders = asyncHandler(async (req, res) => {
+    // console.log(req.query)
+    const userId = req.query.userId;
+    try {
+        const user = await User.findById(userId);
+        if(!user) {
+            return res.status(404).json({ success: "false", message: 'User not found' });
+        }
+        const orders = await Order.find({ sellerId: userId, transactionStatus: 'Pending' });
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 // Add new order
 const addOrder = asyncHandler(async (req, res) => {
     const { buyerEmail, sellerId, amount, otp, Items } = req.body;
@@ -137,4 +153,56 @@ const deleteProduct = asyncHandler(async (req, res) => {
     }
 });
 
-export { addOrder, getSoldProducts, getBoughtProducts, getOrders, deleteProduct, checkProduct };
+// verify OTP and update the info (BoughtItems, SoldItems and transactionStatus)
+const verifyOtp = asyncHandler(async (req, res) => {
+    const { orderId, otp } = req.body;
+    try {
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order does not exist" });
+        }
+        const isMatch = await bcrypt.compare(otp, order.hashedOtp);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: "Invalid OTP" });
+        }
+        order.transactionStatus = 'Completed';
+        order.Items.forEach(async (item) => {
+            // Add to buyer's boughtItems
+            const buyer = await User.findById(order.buyerId);
+            buyer.boughtItems.push(item);
+            await buyer.save();
+            // Add to seller's soldItems
+            const seller = await User.findById(order.sellerId);
+            seller.soldItems.push(item);
+            await seller.save();
+        });
+        await order.save();
+        res.status(200).json({ success: true, message: "Order completed successfully" });
+    } catch (error) {
+        console.error('Error verifying OTP:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+});
+
+// regenerate OTP
+const regenerateOtp = asyncHandler(async (req, res) => {
+    const { orderId } = req.body;
+    try {
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order does not exist" });
+        }
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const salt = await bcrypt.genSalt(10);
+        const hashedOtp = await bcrypt.hash(otp, salt);
+        order.otp = otp;
+        order.hashedOtp = hashedOtp;
+        await order.save();
+        res.status(200).json({ success: true, message: "OTP regenerated successfully" });
+    } catch (error) {
+        console.error('Error regenerating OTP:', error);
+        res.status(500).json({ success: false, message: 'Server Error' });
+    }
+});
+
+export { addOrder, getSoldProducts, getBoughtProducts, getOrders, getSellOrders, deleteProduct, checkProduct, verifyOtp, regenerateOtp };

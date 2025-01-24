@@ -19,18 +19,9 @@ const Navbar = () => {
 
   return (
     <div className='flex items-center justify-between py-5 font-medium'>
-      <img src={assets.logo} className='h-10' alt="logo" />
-      <ul className='flex items-center space-x-5 text-sm text-gray-700'>
-        <NavLink to='/' className='flex flex-col items-center gap-1'>
-          <p>HOME</p>
-          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-        </NavLink>
-        <NavLink to='/contact' className='flex flex-col items-center gap-1'>
-          <p>CONTACT</p>
-          <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-        </NavLink>
-      </ul>
-
+      <NavLink to='/'>
+        <img src={assets.logo} className='h-10' alt="logo" />
+      </NavLink>
       <div className='flex items-center space-x-5'>
         <NavLink to='/sell'>
           <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.plus} className='h-6' alt="sell" />
@@ -64,6 +55,9 @@ const Navbar = () => {
             </>
           )}
         </div>
+        <NavLink to='/deliver'>
+          <img onClick={() => Cookies.get('token') ? null : navigate('/deliver')} src={assets.deliver} className='h-10' alt="deliver" />
+        </NavLink>
         <div className='group relative'>
           <img onClick={() => navigate('/login')} src={assets.profile} className='h-8' alt="profile" />
           <div className='group-hover:block hidden absolute dropdown-menu right-0 pt-4'>
