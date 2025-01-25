@@ -181,14 +181,11 @@ const Deliver = () => {
                   View Review
                 </button>
               ) : (
-                <form onSubmit={(e) => {
-                    e.preventDefault();
-                    const otp = e.target.elements.otp.value;
-                    handleOTPSubmit(order._id, otp);
-                }} className="flex items-center">
-                    <input type="text" name="otp" placeholder="Enter OTP" className="border p-1 rounded w-24" />
-                    <button type="submit" className="ml-2 p-1 w-24 bg-blue-500 text-white rounded">Submit</button>
-                </form>
+                <button 
+                  className="p-1 bg-red-600 text-white rounded cursor-not-allowed" disabled={true}
+                >
+                  Review Not Made
+                </button>
               )
             ) : (
               <form onSubmit={(e) => {

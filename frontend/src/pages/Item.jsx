@@ -53,12 +53,14 @@ const Item = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userEmail, setUserEmail] = useState(Cookies.get('userEmail') || '');
     const [isInCart, setIsInCart] = useState(false);
+    const [sellerRating, setSellerRating] = useState(false);
 
     useEffect(() => {
         const fetchItem = async () => {
             try {
                 const { data } = await axios.get(`http://localhost:4000/api/product/${id}`);
                 setItem(data);
+                fetchSellerRating(data.sellerId); // Call fetchSellerRating after item data is fetched
                 setLoading(false);
             } catch (error) {
                 setError('Error fetching item');
@@ -111,6 +113,19 @@ const Item = () => {
             }
         };
 
+        const fetchSellerRating = async (sellerId) => {
+            try {
+                const response = await axios.post('http://localhost:4000/api/review/rating', {
+                    sellerId: sellerId
+                });
+                if (response.data.success) {
+                    setSellerRating(response.data.rating);
+                }
+            } catch (error) {
+                console.error('Error fetching seller rating:', error);
+            }
+        }
+
         checkToken();
         checkIfInCart();
     }, [id]);
@@ -161,7 +176,13 @@ const Item = () => {
                                 <strong>Category:</strong> {item.category}
                             </p>
                             <p className="text-lg">
-                                <strong>Seller:</strong> {item.userEmail}
+                                <strong>Seller:</strong> {item.userEmail} 
+                                <strong className={`
+                                    ml-2 
+                                    ${sellerRating >= 4 ? 'text-green-600' : sellerRating < 1 ? 'text-red-600' : 'text-yellow-600'}
+                                `}>
+                                    {sellerRating}
+                                </strong>
                             </p>
                             <p className="text-lg">
                                 <strong>Status:</strong> {item.status}

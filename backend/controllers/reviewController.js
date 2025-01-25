@@ -61,5 +61,25 @@ const addReview = asyncHandler(async (req, res) => {
     }
 });
 
+// get seller rating 
+const getSellerRating = asyncHandler(async (req, res) => {
+    const sellerId = req.body.sellerId;
+    try {
+        const seller = await User.findById(sellerId);
+        if (!seller) {
+            return res.status(404).json({ success: false, message: 'Seller not found' });
+        }
+        const allReviews = await Review.find({ userId: sellerId });
+        let totalRating = 0;
+        allReviews.forEach(review => {
+            totalRating += review.rating;
+        });
+        const rating = totalRating / allReviews.length;
+        res.json({ success: true, rating });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
 
-export { getReviews, addReview, getReview };
+
+export { getReviews, addReview, getReview, getSellerRating };
