@@ -132,6 +132,16 @@ const Profile = () => {
                     className="w-full p-2 border border-gray-300 rounded mt-1"
                   />
                 </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700">New Password</label>
+                  <input
+                    type="text"
+                    name="newPassword"
+                    value={formData.newPassword}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded mt-1"
+                  />
+                </div>
                 <button
                   onClick={handleSave}
                   className="w-full bg-blue-500 text-white p-2 rounded"

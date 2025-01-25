@@ -102,11 +102,14 @@ const details = async (req, res) => {
 };
 
 const update = async (req, res) => {
-    const { email, firstName, lastName, contactNumber } = req.body;
+    const { email, firstName, lastName, contactNumber, newPassword } = req.body;
     try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        const password = hashedPassword;
         const user = await User.findOneAndUpdate(
             { email },
-            { firstName, lastName, contactNumber },
+            { firstName, lastName, contactNumber, password },
             { new: true }
         );
         if (!user) {

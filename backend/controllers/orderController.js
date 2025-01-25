@@ -51,7 +51,7 @@ const getOrders = asyncHandler(async (req, res) => {
         if(!user) {
             return res.status(404).json({ success: "false", message: 'User not found' });
         }
-        const orders = await Order.find({ buyerId: userId, transactionStatus: 'Pending' });
+        const orders = await Order.find({ buyerId: userId });
         res.json(orders);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -67,7 +67,7 @@ const getSellOrders = asyncHandler(async (req, res) => {
         if(!user) {
             return res.status(404).json({ success: "false", message: 'User not found' });
         }
-        const orders = await Order.find({ sellerId: userId, transactionStatus: 'Pending' });
+        const orders = await Order.find({ sellerId: userId });
         res.json(orders);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });

@@ -10,6 +10,13 @@ const Deliver = () => {
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [sellerEmail, setSellerEmail] = useState('');
+    const [showReview, setShowReview] = useState(false);
+    const [reviewData, setReviewData] = useState({
+        orderId: '',
+        rating: '',
+        comment: ''
+    });
+    const [reviews, setReviews] = useState([]);
 
     useEffect(() => {
         const fetchOrders = async (userId) => {
@@ -32,6 +39,21 @@ const Deliver = () => {
                 const itemsMap = itemsResults.reduce((acc, curr) => ({ ...acc, ...curr }), {});
                 
                 setItemsByOrder(itemsMap);
+
+                // Fetch reviews for each order
+                const reviewsPromises = data.map(async (order) => {
+                    try {
+                        const reviewResponse = await axios.post('http://localhost:4000/api/review/get', { orderId: order._id });
+                        return reviewResponse.data.success ? reviewResponse.data.review : null;
+                    } catch (error) {
+                        console.error(`Error fetching review for order ${order._id}:`, error);
+                        return null;
+                    }
+                });
+
+                const reviewsResults = await Promise.all(reviewsPromises);
+                setReviews(reviewsResults.filter(review => review !== null));
+
                 setLoading(false);
             } catch (error) {
                 setError('Error fetching items');
@@ -82,6 +104,25 @@ const Deliver = () => {
         }
     };
 
+    const fetchReview = async (orderId) => {
+        try {
+            const response = await axios.post('http://localhost:4000/api/review/get', { orderId });
+            if (response.data.success) {
+                setReviewData(response.data.review);
+                setShowReview(true);
+            } else {
+                alert('Error fetching review');
+            }
+        } catch (error) {
+            console.error('Error fetching review:', error);
+            alert('Error fetching review');
+        }
+    };
+
+    const isReviewPublished = (orderId) => {
+        return reviews.some(review => review.orderId === orderId);
+    };
+
     if (loading) return (
         <div className="flex justify-center items-center h-screen">
             <div className="text-xl text-gray-600">Loading...</div>
@@ -101,24 +142,24 @@ const Deliver = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">Deliver Orders</h1>
       
       <div className="w-full overflow-x-auto">
-        <div className="grid grid-cols-7 gap-2 bg-gray-100 p-2 font-bold text-center">
-        <div>Order ID</div>
+        <div className="grid grid-cols-10 gap-2 bg-gray-100 p-2 font-bold text-center">
+        <div className='col-span-2'>Order ID</div>
         <div>Status</div>
         <div>Items</div>
         <div>Amount</div>
-        <div>Buyer</div>
+        <div className='col-span-2'>Buyer</div>
         <div>Order Date</div>
-        <div>Enter OTP</div>
+        <div className='col-span-2'>Actions</div>
         </div>
         
         <div className="divide-y divide-gray-200">
         {orders.map(order => (
           <div 
           key={order._id} 
-          className="grid grid-cols-7 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
+          className="grid grid-cols-10 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
           >
-          <div>{order._id}</div>
-          <div className={order.transactionStatus === 'Pending' ? 'text-orange-500' : ''}>
+          <div className='col-span-2'>{order._id}</div>
+          <div className={order.transactionStatus === 'Pending' ? 'text-orange-500' : 'text-green-700'}>
             {order.transactionStatus}
           </div>
           <div>
@@ -128,22 +169,65 @@ const Deliver = () => {
             }
           </div>
           <div>₹{order.amount.toFixed(2)}</div>
-          <div>{order.buyerEmail}</div>
+          <div className='col-span-2'>{order.buyerEmail}</div>
           <div>{new Date(order.createdAt).toLocaleDateString()}</div>
-          <div>
-            <form onSubmit={(e) => {
-                e.preventDefault();
-                const otp = e.target.elements.otp.value;
-                handleOTPSubmit(order._id, otp);
-            }} className="flex items-center">
-                <input type="text" name="otp" placeholder="Enter OTP" className="border p-1 rounded w-24" />
-                <button type="submit" className="ml-2 p-1 w-24 bg-blue-500 text-white rounded">Submit</button>
-            </form>
+          <div className='col-span-2'>
+            {order.transactionStatus === 'Completed' ? (
+              isReviewPublished(order._id) ? (
+                <button 
+                  onClick={() => fetchReview(order._id)} 
+                  className="p-1 bg-green-700 text-white rounded"
+                >
+                  View Review
+                </button>
+              ) : (
+                <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const otp = e.target.elements.otp.value;
+                    handleOTPSubmit(order._id, otp);
+                }} className="flex items-center">
+                    <input type="text" name="otp" placeholder="Enter OTP" className="border p-1 rounded w-24" />
+                    <button type="submit" className="ml-2 p-1 w-24 bg-blue-500 text-white rounded">Submit</button>
+                </form>
+              )
+            ) : (
+              <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const otp = e.target.elements.otp.value;
+                  handleOTPSubmit(order._id, otp);
+              }} className="flex items-center">
+                  <input type="text" name="otp" placeholder="Enter OTP" className="border p-1 rounded w-24" />
+                  <button type="submit" className="ml-2 p-1 w-24 bg-blue-500 text-white rounded">Submit</button>
+              </form>
+            )}
           </div>
           </div>
         ))}
         </div>
       </div>
+
+      {showReview && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded shadow-md w-80">
+            <h2 className="text-2xl mb-4">Review</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700">Rating</label>
+              <p className="w-full p-2 border border-gray-300 rounded mt-1">{reviewData.rating}</p>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700">Comment</label>
+              <p className="w-full p-2 border border-gray-300 rounded mt-1">{reviewData.comment}</p>
+            </div>
+            <button 
+              type="button" 
+              onClick={() => setShowReview(false)} 
+              className="w-full bg-gray-500 text-white p-2 rounded mt-2"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       </div>
     );
 };
