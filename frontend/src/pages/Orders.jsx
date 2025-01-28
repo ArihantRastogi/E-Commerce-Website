@@ -27,7 +27,10 @@ const Orders = () => {
                 // Fetch reviews for each order
                 const reviewsPromises = data.map(async (order) => {
                     try {
-                        const reviewResponse = await axios.post('http://localhost:4000/api/review/get', { orderId: order._id });
+                        const reviewResponse = await axios.post('http://localhost:4000/api/review/get', 
+                        { orderId: order._id },
+                        { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                        );
                         return reviewResponse.data.success ? reviewResponse.data.review : null;
                     } catch (error) {
                         console.error(`Error fetching review for order ${order._id}:`, error);
@@ -73,7 +76,11 @@ const Orders = () => {
 
     const handleRegenerateOTP = async (orderId) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/order/regenerateOtp', { orderId });
+            const response = await axios.post('http://localhost:4000/api/order/regenerateOtp', { 
+            orderId 
+          },
+          { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+          );
             if (response.data.success) {
                 window.location.reload();
             } else {
@@ -88,7 +95,10 @@ const Orders = () => {
     const fetchReview = async (orderId) => {
         try {
             console.log('orderId:', orderId);
-            const response = await axios.post('http://localhost:4000/api/review/get', { orderId });
+            const response = await axios.post('http://localhost:4000/api/review/get', 
+            { orderId },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             if (response.data.success) {
                 setReviewData(response.data.review);
                 setShowReview(true);
@@ -113,7 +123,10 @@ const Orders = () => {
         e.preventDefault();
         try {
             console.log('reviewData:', reviewData);
-            const response = await axios.post('http://localhost:4000/api/review/add', reviewData);
+            const response = await axios.post('http://localhost:4000/api/review/add', 
+            {reviewData},
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             if (response.data.success) {
                 alert('Review submitted successfully');
                 window.location.reload();

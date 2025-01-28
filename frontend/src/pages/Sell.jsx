@@ -53,7 +53,10 @@ const Sell = () => {
 
     const deleteItem = async (itemId) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/sell/delete', {itemId});
+            const response = await axios.post('http://localhost:4000/api/sell/delete', 
+            { itemId },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             // console.log(response.data);
             window.location.reload();
         } catch (error) {

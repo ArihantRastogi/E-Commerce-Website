@@ -101,7 +101,9 @@ const Item = () => {
                     const response = await axios.post('http://localhost:4000/api/cart/check', {
                         userEmail: userEmail,
                         productId: id
-                    });
+                    },
+                    { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                    );
                     if (response.data.success) {
                         setIsInCart(false);
                     } else {
@@ -115,9 +117,10 @@ const Item = () => {
 
         const fetchSellerRating = async (sellerId) => {
             try {
-                const response = await axios.post('http://localhost:4000/api/review/rating', {
-                    sellerId: sellerId
-                });
+                const response = await axios.post('http://localhost:4000/api/review/rating', 
+                { sellerId: sellerId },
+                { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                );
                 if (response.data.success) {
                     setSellerRating(response.data.rating);
                 }
@@ -140,7 +143,9 @@ const Item = () => {
             await axios.post('http://localhost:4000/api/cart/add', {
                 userEmail: userEmail,
                 productId: ID
-            });
+            },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             setIsInCart(true);
             window.location.reload();
         } catch (error) {

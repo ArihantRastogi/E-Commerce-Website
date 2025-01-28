@@ -27,7 +27,10 @@ const Deliver = () => {
                 // Fetch items for each order and store in an object keyed by order ID
                 const itemsPromises = data.map(async (order) => {
                     try {
-                        const itemsResponse = await axios.post('http://localhost:4000/api/order/getOrderedItems', { order: order._id });
+                        const itemsResponse = await axios.post('http://localhost:4000/api/order/getOrderedItems', 
+                        { order: order._id },
+                        { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                        );
                         return { [order._id]: itemsResponse.data };
                     } catch (error) {
                         console.error(`Error fetching items for order ${order._id}:`, error);
@@ -43,7 +46,10 @@ const Deliver = () => {
                 // Fetch reviews for each order
                 const reviewsPromises = data.map(async (order) => {
                     try {
-                        const reviewResponse = await axios.post('http://localhost:4000/api/review/get', { orderId: order._id });
+                        const reviewResponse = await axios.post('http://localhost:4000/api/review/get', 
+                        { orderId: order._id },
+                        { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                        );
                         return reviewResponse.data.success ? reviewResponse.data.review : null;
                     } catch (error) {
                         console.error(`Error fetching review for order ${order._id}:`, error);
@@ -92,7 +98,12 @@ const Deliver = () => {
 
     const handleOTPSubmit = async (orderId, otp) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/order/verifyOtp', { orderId, otp });
+            const response = await axios.post('http://localhost:4000/api/order/verifyOtp', { 
+              orderId, 
+              otp 
+            },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             if (response.data.success) {
                 window.location.reload();
             } else {
@@ -106,7 +117,10 @@ const Deliver = () => {
 
     const fetchReview = async (orderId) => {
         try {
-            const response = await axios.post('http://localhost:4000/api/review/get', { orderId });
+            const response = await axios.post('http://localhost:4000/api/review/get', 
+            { orderId },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             if (response.data.success) {
                 setReviewData(response.data.review);
                 setShowReview(true);

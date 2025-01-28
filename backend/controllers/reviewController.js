@@ -36,7 +36,7 @@ const getReview = asyncHandler(async (req, res) => {
 // Add review of user given orderId
 const addReview = asyncHandler(async (req, res) => {
     // console.log(req.body);
-    const { orderId, rating, comment } = req.body;
+    const { orderId, rating, comment } = req.body.reviewData;
     try {
         const order = await Order.findById(orderId);
         if(!order) {

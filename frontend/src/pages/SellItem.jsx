@@ -33,7 +33,9 @@ const SellItem = () => {
             const response = await axios.post('http://localhost:4000/api/sell/add', {
                 ...formData,
                 sellerId: userEmail
-            });
+            },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             if (response.data.success) {
                 navigate('/sell'); // Redirect to sell page
             } else {

@@ -70,10 +70,13 @@ const Cart = () => {
     const handleRemoveFromCart = async (itemId) => {
         try {
             const userEmail = Cookies.get('userEmail');
-            await axios.post('http://localhost:4000/api/cart/delete', {
-                userEmail: userEmail,
-                productId: itemId
-            });
+            await axios.post('http://localhost:4000/api/cart/delete',
+                {
+                  userEmail: userEmail,
+                  productId: itemId
+                },
+                { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+              );
             window.location.reload();
         } catch (error) {
             console.error('Error removing item from cart:', error);
@@ -109,7 +112,9 @@ const Cart = () => {
                     amount,
                     otp,
                     Items
-                });
+                },
+                { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+              );
 
                 if (!response.data.success) {
                     alert(`Failed to place order for seller: ${sellerId}`);
@@ -121,7 +126,9 @@ const Cart = () => {
                         buyerEmail: buyerEmail,
                         productId: item._id,
                         status: 'sold'
-                    });
+                    },
+                    { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                  );
                     if (!response.data.success) {
                         alert(`Failed to update cart for item: ${item._id}`);
                         return;
