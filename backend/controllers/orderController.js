@@ -95,7 +95,6 @@ const addOrder = asyncHandler(async (req, res) => {
             buyerEmail,
             sellerEmail: seller.email,
             amount, 
-            otp,
             hashedOtp,
             Items // Save the Items array in the order
         });
@@ -195,10 +194,9 @@ const regenerateOtp = asyncHandler(async (req, res) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const salt = await bcrypt.genSalt(10);
         const hashedOtp = await bcrypt.hash(otp, salt);
-        order.otp = otp;
         order.hashedOtp = hashedOtp;
         await order.save();
-        res.status(200).json({ success: true, message: "OTP regenerated successfully" });
+        res.status(200).json({ success: true, otp, message: "OTP regenerated successfully" });
     } catch (error) {
         console.error('Error regenerating OTP:', error);
         res.status(500).json({ success: false, message: 'Server Error' });

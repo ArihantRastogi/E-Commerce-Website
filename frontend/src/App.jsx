@@ -10,8 +10,8 @@ import Item from './pages/Item'
 import Sell from './pages/Sell'
 import SellItem from './pages/SellItem'
 import Cart from './pages/Cart'
-import SoldItems from './pages/SoldItems'
-import BoughtItems from './pages/BoughtItems'
+// import SoldItems from './pages/SoldItems'
+// import BoughtItems from './pages/BoughtItems'
 import Orders from './pages/Orders'
 import Deliver from './pages/Deliver'
 
@@ -30,8 +30,8 @@ const App = () => {
         <Route path='/sellitem' element={<SellItem />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/order' element={<Orders />} />
-        <Route path='/solditems' element={<SoldItems />} />
-        <Route path='/boughtitems' element={<BoughtItems />} />
+        {/* <Route path='/solditems' element={<SoldItems />} />
+        <Route path='/boughtitems' element={<BoughtItems />} /> */}
         <Route path='/deliver' element={<Deliver />} />
       </Routes>
     </div>

@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-const Orders = () => {
+const CombinedPage = () => {
+    const [view, setView] = useState('bought'); // 'bought', 'orders', 'sold'
+    const [items, setItems] = useState([]);
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategories, setSelectedCategories] = useState([]);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [showReview, setShowReview] = useState(false);
     const [reviewData, setReviewData] = useState({
@@ -18,30 +23,37 @@ const Orders = () => {
     const [reviews, setReviews] = useState([]);
 
     useEffect(() => {
-        const fetchOrders = async (userId) => {
+        const fetchData = async (userId) => {
             try {
-                const { data } = await axios.get(`http://localhost:4000/api/order?userId=${userId}`);
-                setOrders(data);
+                if (view === 'bought') {
+                    const { data } = await axios.get(`http://localhost:4000/api/order/boughtitems?userId=${userId}`);
+                    setItems(data);
+                } else if (view === 'sold') {
+                    const { data } = await axios.get(`http://localhost:4000/api/order/solditems?userId=${userId}`);
+                    setItems(data);
+                } else if (view === 'orders') {
+                    const { data } = await axios.get(`http://localhost:4000/api/order?userId=${userId}`);
+                    setOrders(data);
+
+                    const reviewsPromises = data.map(async (order) => {
+                        try {
+                            const reviewResponse = await axios.post('http://localhost:4000/api/review/get', 
+                            { orderId: order._id },
+                            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+                            );
+                            return reviewResponse.data.success ? reviewResponse.data.review : null;
+                        } catch (error) {
+                            console.error(`Error fetching review for order ${order._id}:`, error);
+                            return null;
+                        }
+                    });
+
+                    const reviewsResults = await Promise.all(reviewsPromises);
+                    setReviews(reviewsResults.filter(review => review !== null));
+                }
                 setLoading(false);
-
-                // Fetch reviews for each order
-                const reviewsPromises = data.map(async (order) => {
-                    try {
-                        const reviewResponse = await axios.post('http://localhost:4000/api/review/get', 
-                        { orderId: order._id },
-                        { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
-                        );
-                        return reviewResponse.data.success ? reviewResponse.data.review : null;
-                    } catch (error) {
-                        console.error(`Error fetching review for order ${order._id}:`, error);
-                        return null;
-                    }
-                });
-
-                const reviewsResults = await Promise.all(reviewsPromises);
-                setReviews(reviewsResults.filter(review => review !== null));
             } catch (error) {
-                setError('Error fetching items');
+                setError('Error fetching data');
                 setLoading(false);
             }
         };
@@ -57,7 +69,7 @@ const Orders = () => {
                 const response = await axios.post('http://localhost:4000/api/user/checkToken', { token });
                 if (response.data.success) {
                     setIsLoggedIn(true);
-                    fetchOrders(response.data.userId);
+                    fetchData(response.data.userId);
                 } else {
                     Cookies.remove('token');
                     Cookies.remove('userEmail');
@@ -72,16 +84,36 @@ const Orders = () => {
         };
 
         checkToken();
-    }, []);
+    }, [view]);
+
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleCategoryChange = (event) => {
+        const category = event.target.value;
+        setSelectedCategories(prevCategories =>
+            prevCategories.includes(category)
+                ? prevCategories.filter(c => c !== category)
+                : [...prevCategories, category]
+        );
+    };
+
+    const filteredItems = items.filter(item => {
+        const matchesSearchTerm = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(item.category);
+        return matchesSearchTerm && matchesCategory;
+    });
 
     const handleRegenerateOTP = async (orderId) => {
         try {
             const response = await axios.post('http://localhost:4000/api/order/regenerateOtp', { 
-            orderId 
-          },
-          { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
-          );
+                orderId 
+            },
+            { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
+            );
             if (response.data.success) {
+                alert(`New OTP: ${response.data.otp}`);
                 window.location.reload();
             } else {
                 alert('Error regenerating OTP');
@@ -94,7 +126,6 @@ const Orders = () => {
 
     const fetchReview = async (orderId) => {
         try {
-            console.log('orderId:', orderId);
             const response = await axios.post('http://localhost:4000/api/review/get', 
             { orderId },
             { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
@@ -122,7 +153,6 @@ const Orders = () => {
     const handleReviewSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log('reviewData:', reviewData);
             const response = await axios.post('http://localhost:4000/api/review/add', 
             {reviewData},
             { headers: { Authorization: `Bearer ${Cookies.get('token')}` } }
@@ -159,138 +189,222 @@ const Orders = () => {
     );
 
     return (
-      <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">My Orders</h1>
-      
-      {/* Table-like layout */}
-      <div className="w-full overflow-x-auto">
-        <div className="grid grid-cols-10 gap-2 bg-gray-100 p-2 font-bold text-center">
-        <div className="col-span-2">Order ID</div>
-        <div>Status</div>
-        <div>Amount</div>
-        <div className="col-span-2">Buyer</div>
-        <div className="col-span-2">Seller</div>
-        <div>Order Date</div>
-        <div>Actions</div>
-        </div>
-        
-        <div className="divide-y divide-gray-200">
-        {orders.map(order => (
-          <div 
-          key={order._id} 
-          className="grid grid-cols-10 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
-          >
-          <div className="col-span-2">{order._id}</div>
-          <div className={order.transactionStatus === 'Pending' ? 'text-orange-500' : 'text-green-700'}>
-            {order.transactionStatus}
-          </div>
-          <div>₹{order.amount.toFixed(2)}</div>
-          <div className="col-span-2">{order.buyerEmail}</div>
-          <div className="col-span-2">{order.sellerEmail}</div>
-          <div>{new Date(order.createdAt).toLocaleDateString()}</div>
-          <div>
-            {order.transactionStatus === 'Completed' ? (
-              isReviewPublished(order._id) ? (
-                <button 
-                  onClick={() => fetchReview(order._id)} 
-                  className="p-1 bg-green-700 text-white rounded"
+        <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-6 text-center">
+                {view === 'bought' ? 'Bought Items' : view === 'sold' ? 'Sold Items' : 'My Orders'}
+            </h1>
+            <div className="flex justify-center mb-6">
+                <button
+                    onClick={() => setView('bought')}
+                    className={`px-4 py-2 mx-2 ${view === 'bought' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                 >
-                  View Review
+                    Bought Items
                 </button>
-              ) : (
-                <button 
-                  onClick={() => {
-                      setReviewData({ ...reviewData, orderId: order._id });
-                      setShowReviewForm(true);
-                  }} 
-                  className="p-1 bg-blue-500 text-white rounded"
+                <button
+                    onClick={() => setView('orders')}
+                    className={`px-4 py-2 mx-2 ${view === 'orders' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                 >
-                  Write a Review
+                    Orders
                 </button>
-              )
+                <button
+                    onClick={() => setView('sold')}
+                    className={`px-4 py-2 mx-2 ${view === 'sold' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                    Sold Items
+                </button>
+            </div>
+
+            {view === 'bought' || view === 'sold' ? (
+                <>
+                    <div className="flex mb-4">
+                        <input
+                            type="text"
+                            placeholder="Search for products..."
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            className="border p-2 rounded w-full"
+                        />
+                        <div className="relative ml-4">
+                            <button
+                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                                className="border p-2 rounded bg-white"
+                            >
+                                Filter by Category
+                            </button>
+                            {dropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg">
+                                    <div className="p-2">
+                                        {['Books', 'Clothing', 'Electronics','Furniture', 'Grocery', 'Other'].map(category => (
+                                            <label key={category} className="block mb-2">
+                                                <input
+                                                    type="checkbox"
+                                                    value={category}
+                                                    checked={selectedCategories.includes(category)}
+                                                    onChange={handleCategoryChange}
+                                                    className="mr-2"
+                                                />
+                                                {category}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {filteredItems.map(item => (
+                            <div 
+                                key={item._id} 
+                                className="border rounded-lg shadow-md p-4 transition-all hover:shadow-lg"
+                            >
+                                <Link to={`/product/${item._id}`} className="block">
+                                    <h2 className="text-xl font-semibold mb-2 text-blue-700 hover:text-blue-900">
+                                        {item.name}
+                                    </h2>
+                                </Link>
+                                <p className="text-gray-600 mb-2">{item.description}</p>
+                                <p className="text-gray-600 mb-2">Category: {item.category}</p>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-lg font-bold text-green-700">
+                                        ₹{item.price.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
             ) : (
-              <button 
-                onClick={() => handleRegenerateOTP(order._id)} 
-                className="p-1 text-gray-500 rounded"
-              >
-                {order.otp}↺
-              </button>
+                <>
+                    <div className="w-full overflow-x-auto">
+                        <div className="grid grid-cols-10 gap-2 bg-gray-100 p-2 font-bold text-center">
+                            <div className="col-span-2">Order ID</div>
+                            <div>Status</div>
+                            <div>Amount</div>
+                            <div className="col-span-2">Buyer</div>
+                            <div className="col-span-2">Seller</div>
+                            <div>Order Date</div>
+                            <div>Actions</div>
+                        </div>
+                        
+                        <div className="divide-y divide-gray-200">
+                            {orders.map(order => (
+                                <div 
+                                    key={order._id} 
+                                    className="grid grid-cols-10 gap-2 p-2 text-center hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="col-span-2">{order._id}</div>
+                                    <div className={order.transactionStatus === 'Pending' ? 'text-orange-500' : 'text-green-700'}>
+                                        {order.transactionStatus}
+                                    </div>
+                                    <div>₹{order.amount.toFixed(2)}</div>
+                                    <div className="col-span-2">{order.buyerEmail}</div>
+                                    <div className="col-span-2">{order.sellerEmail}</div>
+                                    <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+                                    <div>
+                                        {order.transactionStatus === 'Completed' ? (
+                                            isReviewPublished(order._id) ? (
+                                                <button 
+                                                    onClick={() => fetchReview(order._id)} 
+                                                    className="p-1 bg-green-700 text-white rounded"
+                                                >
+                                                    View Review
+                                                </button>
+                                            ) : (
+                                                <button 
+                                                    onClick={() => {
+                                                        setReviewData({ ...reviewData, orderId: order._id });
+                                                        setShowReviewForm(true);
+                                                    }} 
+                                                    className="p-1 bg-blue-500 text-white rounded"
+                                                >
+                                                    Write a Review
+                                                </button>
+                                            )
+                                        ) : (
+                                            <button 
+                                                onClick={() => handleRegenerateOTP(order._id)} 
+                                                className="p-1 text-gray-500 rounded"
+                                            >
+                                                {order.otp}↺
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {showReviewForm && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="bg-white p-6 rounded shadow-md w-80">
+                                <h2 className="text-2xl mb-4">Write a Review</h2>
+                                <form onSubmit={handleReviewSubmit}>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700">Rating</label>
+                                        <input
+                                            type="range"
+                                            name="rating"
+                                            value={reviewData.rating}
+                                            onChange={handleReviewChange}
+                                            className="w-full"
+                                            min="1"
+                                            max="5"
+                                            step="1"
+                                            required
+                                        />
+                                        <div className="text-center mt-2">{reviewData.rating}</div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700">Comment</label>
+                                        <textarea
+                                            name="comment"
+                                            value={reviewData.comment}
+                                            onChange={handleReviewChange}
+                                            className="w-full p-2 border border-gray-300 rounded mt-1"
+                                            required
+                                        />
+                                    </div>
+                                    <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
+                                        Submit Review
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowReviewForm(false)} 
+                                        className="w-full bg-gray-500 text-white p-2 rounded mt-2"
+                                    >
+                                        Cancel
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {showReview && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="bg-white p-6 rounded shadow-md w-80">
+                                <h2 className="text-2xl mb-4">Review</h2>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700">Rating</label>
+                                    <p className="w-full p-2 border border-gray-300 rounded mt-1">{reviewData.rating}</p>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-gray-700">Comment</label>
+                                    <p className="w-full p-2 border border-gray-300 rounded mt-1">{reviewData.comment}</p>
+                                </div>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowReview(false)} 
+                                    className="w-full bg-gray-500 text-white p-2 rounded mt-2"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
-          </div>
-          </div>
-        ))}
         </div>
-      </div>
-
-      {showReviewForm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-md w-80">
-            <h2 className="text-2xl mb-4">Write a Review</h2>
-            <form onSubmit={handleReviewSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700">Rating</label>
-                <input
-                  type="range"
-                  name="rating"
-                  value={reviewData.rating}
-                  onChange={handleReviewChange}
-                  className="w-full"
-                  min="1"
-                  max="5"
-                  step="1"
-                  required
-                />
-                <div className="text-center mt-2">{reviewData.rating}</div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Comment</label>
-                <textarea
-                  name="comment"
-                  value={reviewData.comment}
-                  onChange={handleReviewChange}
-                  className="w-full p-2 border border-gray-300 rounded mt-1"
-                  required
-                />
-              </div>
-              <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded">
-                Submit Review
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setShowReviewForm(false)} 
-                className="w-full bg-gray-500 text-white p-2 rounded mt-2"
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showReview && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow-md w-80">
-            <h2 className="text-2xl mb-4">Review</h2>
-            <div className="mb-4">
-              <label className="block text-gray-700">Rating</label>
-              <p className="w-full p-2 border border-gray-300 rounded mt-1">{reviewData.rating}</p>
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700">Comment</label>
-              <p className="w-full p-2 border border-gray-300 rounded mt-1">{reviewData.comment}</p>
-            </div>
-            <button 
-              type="button" 
-              onClick={() => setShowReview(false)} 
-              className="w-full bg-gray-500 text-white p-2 rounded mt-2"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-      </div>
     );
 };
 
-export default Orders;
+export default CombinedPage;

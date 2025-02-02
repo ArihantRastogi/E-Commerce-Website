@@ -32,7 +32,10 @@ const Navbar = () => {
         <NavLink to='/cart'>
           <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.cart} className='h-12' alt="cart" />
         </NavLink>
-        <div className='group relative'>
+        <NavLink to='/order'>
+          <img onClick={() => Cookies.get('token') ? null : navigate('/login')} src={assets.order} className='h-12' alt="order" />
+        </NavLink>
+        {/* <div className='group relative'>
           <img onClick={() => navigate('/order')} src={assets.order} className='h-12' alt="order" />
           {Cookies.get('token') ? (
             <>
@@ -54,7 +57,7 @@ const Navbar = () => {
             <>
             </>
           )}
-        </div>
+        </div> */}
         <NavLink to='/deliver'>
           <img onClick={() => Cookies.get('token') ? null : navigate('/deliver')} src={assets.deliver} className='h-10' alt="deliver" />
         </NavLink>

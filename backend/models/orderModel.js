@@ -34,10 +34,10 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    otp: {
-        type: String,
-        required: true
-    },
+    // otp: {
+    //     type: String,
+    //     required: true
+    // },
     hashedOtp: {
         type: String,
         required: true

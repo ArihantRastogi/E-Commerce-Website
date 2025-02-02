@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-        match: [/^[a-zA-Z0-9._%+-]+@iiit\.ac\.in$/, 'Please fill a valid IIIT email address']
+        match: [/^[a-zA-Z0-9._%+-]+@([a-zA-Z0-9.-]+\.)?iiit\.ac\.in$/, 'Please fill a valid IIIT email address']
     },
     contactNumber: {
         type: String,
