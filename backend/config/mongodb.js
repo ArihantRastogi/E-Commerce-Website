@@ -5,7 +5,7 @@ const connectDB = async () => {
         console.log("DB connected");
     })
     console.log()
-    await mongoose.connect(`mongodb+srv://arihant200514:rBv1xB3MXicOCbeC@dass.ubpho.mongodb.net/buy-sell`)
+    await mongoose.connect(process.env.MONGODB_URI)
 }
 
 export default connectDB;

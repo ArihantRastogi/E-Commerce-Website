@@ -9,6 +9,7 @@ import sellerRouter from './routes/sellerRoute.js'
 import cartRouter from './routes/cartRoute.js'
 import orderRouter from './routes/orderRoute.js'
 import reviewRouter from './routes/reviewRoute.js'
+import chatRouter from './routes/chatRoute.js'
 
 const app = express()
 const port = process.env.PORT || 4000
@@ -25,6 +26,7 @@ app.use('/api/sell', sellerRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/order', orderRouter)
 app.use('/api/review', reviewRouter)
+app.use('/api/chat', chatRouter)
 
 app.get('/', (req, res) => {
     res.send("API is running")

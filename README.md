@@ -9,3 +9,4 @@
 - Reviews can only be made after an order is completed.
 - Items that are placed for order are updated to status "sold" and do not appear in the view of other buyers or the seller.
 - The seller can only delete an item if it has not been placed for order.
+- The chatbot feauture is only available at home component
