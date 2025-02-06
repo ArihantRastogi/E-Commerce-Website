@@ -24,6 +24,13 @@ const Home = () => {
     setInput('');
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div className="flex items-center justify-center p-40">
       <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden flex h-70">
@@ -99,7 +106,7 @@ const Home = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              onKeyDown={handleKeyDown}
               className="flex-1 p-2 border rounded-l-lg"
               placeholder="Type your message..."
             />
