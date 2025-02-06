@@ -1,5 +1,8 @@
 # E-Commerce Website
 
+## Wesite view
+![Website View](./frontend/src/assets/Website.png)
+
 ## File Structure
 ```
 .
@@ -101,6 +104,3 @@
 - **Deliver Items Page**: Users can complete order deliveries by generating an OTP in the order history page and providing it to the seller. Sellers can enter the OTP to complete the order delivery and regenerate it if needed. The delivery scooter icon on the navbar directs to the deliver items page.
 - **Profile Page**: Users can view and edit their profile. The profile icon on the navbar directs to the profile page.
 - **Item Details Page**: Users can view item details by clicking on the item name in the shop page. They can add items to their cart by clicking on the add to cart button in the item details page.
-
-## Wesite view
-![Website View](./frontend/src/assets/Website.png)
