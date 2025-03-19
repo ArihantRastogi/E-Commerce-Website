@@ -84,6 +84,7 @@
 ```
 ## How to Run
 Prerequisites -> The user has basic knowledge of npm and has it installed on their machine. 
+Update .env with the MongoDB url of the database and GOOGLE_API_KEY for accessing the database and chatbot features.
 - Backend
     1. Install node modules by running `npm install`.
     2. Run the backend server by `npm run server`.
