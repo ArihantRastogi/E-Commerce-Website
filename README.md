@@ -82,6 +82,15 @@
     ├── ./frontend/tailwind.config.js
     └── ./frontend/vite.config.js
 ```
+## How to Run
+Prerequisites -> The user has basic knowledge of npm and has it installed on their machine. 
+- Backend
+    1. Install node modules by running `npm install`.
+    2. Run the backend server by `npm run server`.
+- Frontend
+    1. Install node modules by running `npm install`.
+    2. Run the backend server by `npm run dev`.
+    3. Click on the localhost link.
 
 ## Assumptions
 
